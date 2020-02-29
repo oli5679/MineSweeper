@@ -8,6 +8,9 @@ import minesweeper
 
 GAME = minesweeper.Game()
 
+for row in GAME.mine_locations:
+    print(row)
+
 app = Flask(__name__, static_folder="../build")
 CORS(app)
 
@@ -22,7 +25,7 @@ class NumpyEncoder(json.JSONEncoder):
 def format_game_state(game):
     response = {
         "revealed_state": game.revealed_state,
-        "unclicked_square_count": game.unclicked_squares,
+        "unclicked_non_mine_count": game.unclicked_non_mine_count,
         "has_won": game.has_won,
         "has_lost": game.has_lost,
     }
@@ -46,8 +49,17 @@ def get_state():
 
 @app.route("/click", methods=["POST"])
 def make_click():
+    move_inputs = json.loads(flask.request.data)
+    global GAME
+    GAME.click(int(move_inputs["x"]), int(move_inputs["y"]))
+    return format_game_state(GAME)
+
+
+@app.route("/reset", methods=["POST"])
+def reset_game():
     game_inputs = json.loads(flask.request.data)
-    GAME.click(int(game_inputs["x"]), int(game_inputs["y"]))
+    global GAME
+    GAME = minesweeper.Game(**game_inputs)
     return format_game_state(GAME)
 
 

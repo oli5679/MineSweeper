@@ -3,6 +3,17 @@ import itertools
 import random
 
 
+def gen_neighbor_indexes(x, y, x_max, y_max):
+    neighbors = [
+        (x + x_offset, y + y_offset)
+        for x_offset in range(-1, 2)
+        for y_offset in range(-1, 2)
+    ]
+    return [
+        (x, y) for (x, y) in neighbors if min(x, y) >= 0 and x < x_max and y < y_max
+    ]
+
+
 class Game:
     """Minesweeper game state
 
@@ -24,7 +35,7 @@ class Game:
     def __init__(self, x_max=10, y_max=10, num_mines=10):
         """
         Args:
-             x_max (int): number of rows of puzzle, default 10
+            x_max (int): number of rows of puzzle, default 10
             y_max (int): number of cols of puzzle, default 10
             num_mines (int): number of mines in puzzle, default 10
         """
@@ -32,10 +43,12 @@ class Game:
         self.y_max = y_max
         self.num_mines = num_mines
         self.mine_locations = np.zeros((x_max, y_max))
+        self.flagged_mines = np.zeros((x_max, y_max))
         self.revealed_state = np.ones((x_max, y_max)) * -1
-        self.unclicked_squares = (x_max * y_max) - num_mines
+        self.unclicked_non_mine_count = (x_max * y_max) - num_mines
+        self.unflagged_mine_count = num_mines
         self.has_won = False
-        self.has_lost = True
+        self.has_lost = False
 
         mine_coordinates = random.sample(
             list(itertools.product(range(x_max), range(y_max))), num_mines
@@ -59,9 +72,30 @@ class Game:
 
         else:
             self.revealed_state[x][y] = self._find_neighboring_mines(x, y)
-            self.unclicked_squares -= 1
-            if self.unclicked_squares == 0:
+            self.unclicked_non_mine_count -= 1
+            if self.unclicked_non_mine_count == 0:
                 self.has_won = True
+            if self.revealed_state[x][y] == 0:
+                for x_neighbour, y_neighbour in gen_neighbor_indexes(
+                    x, y, self.x_max, self.y_max
+                ):
+                    if self.revealed_state[x_neighbour][y_neighbour] == -1:
+                        self.click(x_neighbour, y_neighbour)
+
+    def flag(self, x, y):
+        """
+        Clicks on cell and updates revealed_state, has_won & has_lost
+        
+        Args:
+            x: row to click
+            y: col to click
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        self.revealed_state[x][y] = -1
+        self.flagged_mines[x][y] = 1
+        self.unflagged_mine_count -= 1
 
     def _find_neighboring_mines(self, x, y):
         """
@@ -75,11 +109,8 @@ class Game:
             Number of mines neigbhouring cell
         """
         total = 0
-        for x_offset in range(-1, 2):
-            for y_offset in range(-1, 2):
-                x_neighbour = x + x_offset
-                y_neighbour = y + y_offset
-                if x_neighbour >= 0 and x_neighbour < self.x_max:
-                    if y_neighbour >= 0 and y_neighbour < self.y_max:
-                        total += self.mine_locations[x_neighbour][y_neighbour]
+        for x_neighbour, y_neighbour in gen_neighbor_indexes(
+            x, y, self.x_max, self.y_max
+        ):
+            total += self.mine_locations[x_neighbour][y_neighbour]
         return total - self.mine_locations[x][y]

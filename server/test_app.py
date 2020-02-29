@@ -23,3 +23,10 @@ def test_display_game_state(client):
 def test_click(client):
     response = client.post("/click", data=json.dumps({"x": 0, "y": 1}))
     assert response.status_code == 200
+
+
+def test_reset(client):
+    response = client.post(
+        "/reset", data=json.dumps({"x_max": 10, "y_max": 10, "num_mines": 20})
+    )
+    assert response.status_code == 200

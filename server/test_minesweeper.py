@@ -20,7 +20,7 @@ def test_find_neighboring_mines():
 def test_click_on_mine():
     ms = minesweeper.Game(x_max=3, y_max=3, num_mines=3)
     ms.mine_locations = TEST_BOARD
-    ms.click(0, 2)
+    ms.click(1, 2)
     assert ms.has_lost
 
 

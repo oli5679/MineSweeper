@@ -1,14 +1,16 @@
-body, html {
-  height: 100%;
-  width: 100%;
+html, body {
+  background-color: #252839 !important;
 }
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+p {
+  align-content: center;
+  background-color: #495285;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 6em;
 }
-
-body {
-  font-family: Open Sans;
+p > span {
+  opacity: 0.4;
+  text-align: center;
 }

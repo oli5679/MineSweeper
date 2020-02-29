@@ -16,6 +16,10 @@ CORS(app)
 
 
 class NumpyEncoder(json.JSONEncoder):
+    """
+    Extends json dumps to recursively convert numpy arrays to lists
+    """
+
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
@@ -23,6 +27,15 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def format_game_state(game):
+    """
+    Returns json blob with current state of game
+
+    Args:
+        game (minesweeper.Game)
+
+    Returns:
+        response (string): json blog of game state
+    """
     response = {
         "revealed_state": game.revealed_state,
         "unclicked_non_mine_count": game.unclicked_non_mine_count,
@@ -37,18 +50,27 @@ def format_game_state(game):
 ##
 
 
-@app.route("/ping")
+@app.route("/ping", methods=["GET"])
 def health_check():
+    """ 
+    Health check 
+    """
     return "Response"
 
 
 @app.route("/game_state", methods=["GET"])
 def get_state():
+    """ 
+    Return current state 
+    """
     return format_game_state(GAME)
 
 
 @app.route("/click", methods=["POST"])
 def make_click():
+    """
+    Click on cell and return updated game state
+    """
     move_inputs = json.loads(flask.request.data)
     global GAME
     GAME.click(int(move_inputs["x"]), int(move_inputs["y"]))
@@ -57,6 +79,9 @@ def make_click():
 
 @app.route("/reset", methods=["POST"])
 def reset_game():
+    """
+    Create new game with specified game parameters
+    """
     game_inputs = json.loads(flask.request.data)
     global GAME
     GAME = minesweeper.Game(**game_inputs)

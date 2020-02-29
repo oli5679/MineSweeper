@@ -12,6 +12,7 @@ class Game:
         num_mines (int): number of mines in puzzle
         mine_locations (array): cells in board have mine marked with 1/0
         revealed_state (array): cells in board have been revealed to have N neighbours, unrevealed = -1 marked with 1/0
+        unclicked_squares (int): number of cells yet to be clicked on the board
         has_won (boon): has the player already won?
         has_lost (bool): has the plyaer already lost?
 

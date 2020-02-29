@@ -101,7 +101,6 @@ class Game:
             x: row to click
             y: col to click
         """
-        self.revealed_state[x][y] = -1
         self.flagged_mines[x][y] = 1
         self.unflagged_mine_count -= 1
 
@@ -114,7 +113,7 @@ class Game:
             y: cell col
 
         Returns:
-            Number of mines neigbhouring cell
+            total (int): Number of mines neigbhouring cell
         """
         total = 0
         for x_neighbour, y_neighbour in gen_neighbor_indexes(

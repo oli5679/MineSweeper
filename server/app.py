@@ -45,6 +45,11 @@ def find_game_state(game_id):
     return json.dumps(response, cls=NumpyEncoder)
 
 
+@app.errorhandler(404)
+def not_found(error):
+    return flask.make_response(flask.jsonify({"error": "Not found"}), 404)
+
+
 ##
 # API routes
 ##
@@ -54,6 +59,12 @@ def find_game_state(game_id):
 def health_check():
     """ 
     Health check 
+
+    Required headers:
+        None
+
+    Required body:
+        None
     """
     return "Response"
 
@@ -61,7 +72,13 @@ def health_check():
 @app.route("/api/game_state/<string:game_id>", methods=["GET"])
 def get_state(game_id):
     """ 
-    Return current state 
+    Return current state of game with specificed game_id
+
+    Headers
+        None
+
+    Returns
+        game_state (dict): state of game
     """
     return find_game_state(game_id)
 
@@ -70,6 +87,17 @@ def get_state(game_id):
 def make_click():
     """
     Click on cell and return updated game state
+
+    Headers
+        (Content-Type, application/json)
+
+    Body
+        {'game_id':game_id_to_update,
+        'x':x_coordinate_to_click,
+        'y':y_coordinate_to_click}
+
+    Returns
+        game_state (dict): state of game
     """
     move_inputs = json.loads(flask.request.data)
     global GAMES
@@ -81,6 +109,17 @@ def make_click():
 def reset_game():
     """
     Create new game with specified game parameters
+
+    Headers
+        (Content-Type, application/json)
+
+    Body (all optional)
+        {'x_max':number_of_rows (default 10),
+        'y_max':number_of_cols (default 10),
+        'num_mines':number_of_miens (default 10)}
+
+    Returns
+        game_state (dict): state of game
     """
     game_inputs = json.loads(flask.request.data)
     game_id = str(uuid.uuid4())
